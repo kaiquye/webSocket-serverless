@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ACCESS_LEVEL {
+  VISITOR
+  ADMIN
+}
+
+enum CodeConfirmationStatus {
+  CONFIRMED
+  EXPIRED
+  WAITING_FOR_CONFIRMATION
+}
+
+model Visitors {
+  visitor_id                String       @id @default(uuid())
+  name                      String       @db.VarChar(255)
+  email                     String       @unique @db.VarChar(255)
+  lastAccess                DateTime     @db.Timestamptz()
+  created_at                DateTime     @default(now()) @db.Timestamptz()
+  updated_at                DateTime     @default(now()) @updatedAt @db.Timestamptz()
+  accessLevel               ACCESS_LEVEL @default(VISITOR)
+  profileCompletionRequired Boolean      @default(false)
+
+  @@map("tb_visitors")
+}
+
+model EmailConfirmation {
+  id         String                 @id @default(uuid())
+  email      String                 @unique
+  code       Int                    @unique
+  status     CodeConfirmationStatus @default(WAITING_FOR_CONFIRMATION)
+  created_at DateTime               @default(now()) @db.Timestamptz()
+  updated_at DateTime               @default(now()) @updatedAt @db.Timestamptz()
+
+  @@map("tb_email_confirmation")
+}
